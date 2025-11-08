@@ -37,3 +37,66 @@ This research compares three Recurrent Neural Network architectures for AQI regr
 
 ### 🎯 Problem Addressed
 RNNs traditionally require **sequence-formatted (3D) data**:
+(samples, timesteps, features)
+
+But AQI datasets are **tabular (2D)**:
+(samples, features)
+
+### 💡 Novel Solution Proposed
+Convert tabular data into single-timestep sequences:
+(n_samples, 6_features) → (n_samples, 1_timestep, 6_features)
+
+This allows sequence-based learning on static tabular data.
+
+---
+
+## 📊 Model Performance
+
+| Model      | R² Score  | Mean Absolute Error (MAE) |
+|------------|-----------|---------------------------|
+| **GRU**    | 0.9995    | 2.23                      |
+| **LSTM**   | 0.9994    | 2.31                      |
+| SimpleRNN  | 0.9850    | 9.81                      |
+
+➡️ **Conclusion:** GRU performed the best, achieving near-perfect accuracy.
+
+---
+
+## 🚀 Running the Streamlit Application
+
+### 1️⃣ Clone the Repository
+```bash
+git clone https://github.com/Kenche-Koushik/your-repo-name.git
+cd your-repo-name
+```
+
+### 2️⃣ Create & Activate Virtual Environment
+```bash
+python -m venv venv
+
+# Windows
+venv\Scripts\activate
+
+# macOS/Linux
+source venv/bin/activate
+```
+
+### 3️⃣ Install Dependencies
+```bash
+pip install -r requirements.txt
+```
+
+### 4️⃣ Run the App
+```bash
+streamlit run app.py
+```
+
+---
+
+## 👨‍💻 Author
+
+Kenche Koushik
+
+Machine Learning | Deep Learning | Data Analysis
+
+Feel free to star ⭐ the repo, contribute, or open issues.
