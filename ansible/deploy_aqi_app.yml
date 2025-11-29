@@ -1,0 +1,66 @@
+---
+- name: Deploy Air Quality Monitoring and Prediction App
+  hosts: aqi_server
+  become: true
+  vars:
+    project_dir: /home/ubuntu/air-quality-app
+    streamlit_port: 8501
+
+  tasks:
+    - name: Update and install dependencies
+      apt:
+        update_cache: yes
+        name:
+          - python3
+          - python3-pip
+          - python3-venv
+          - git
+        state: present
+
+    - name: Copy project files from local to EC2
+      delegate_to: localhost
+      become: false
+      synchronize:
+        src: "/mnt/c/Koushik/Koushik(B.Tech)/Programming/ML/Air quality monitoring with prediction/"
+        dest: "/home/ubuntu/air-quality-app/"
+        rsync_opts:
+          - "--exclude=__pycache__"
+          - "--exclude=.git"
+          - "--exclude=ansible"
+          - "--rsh='ssh -i /home/kench/p1.pem -o StrictHostKeyChecking=no'"
+
+    - name: Create Python virtual environment
+      shell: python3 -m venv venv
+      args:
+        chdir: "{{ project_dir }}"
+
+    - name: Install requirements
+      pip:
+        requirements: "{{ project_dir }}/requirements.txt"
+        virtualenv: "{{ project_dir }}/venv"
+
+    - name: Create systemd service to run Streamlit
+      copy:
+        dest: /etc/systemd/system/streamlit-app.service
+        content: |
+          [Unit]
+          Description=Streamlit AQI App
+          After=network.target
+
+          [Service]
+          User=ubuntu
+          WorkingDirectory={{ project_dir }}
+          ExecStart={{ project_dir }}/venv/bin/streamlit run app.py --server.port {{ streamlit_port }} --server.address 0.0.0.0
+          Restart=always
+
+          [Install]
+          WantedBy=multi-user.target
+      notify:
+        - restart streamlit
+
+  handlers:
+    - name: restart streamlit
+      systemd:
+        name: streamlit-app
+        enabled: yes
+        state: restarted
